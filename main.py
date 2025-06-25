@@ -5,7 +5,7 @@ from google.genai import types
 import sys
 
 from prompts import system_prompt
-from call_function import available_functions
+from call_function import available_functions, call_function
 
 
 def main():    
@@ -50,7 +50,14 @@ def generate_content(client, messages, verbose):
     
     if response.function_calls:
         for f in response.function_calls:
-            print(f"Calling function: {f.name}({f.args})")
+            func_value = call_function(f)
+            if not func_value.parts[0].function_response.response:
+                raise Exception("Fatal exception: something went wrong")
+            elif func_value.parts[0].function_response.response and verbose:                
+                print(f"-> {func_value.parts[0].function_response.response}")
+
+
+            
     else:       
 
         print("Response:")
