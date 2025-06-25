@@ -2,7 +2,7 @@ import os
 import subprocess
 from google.genai import types
 
-def run_python_file(working_directory, file_path):
+def run_python_files(working_directory, file_path):
     abs_work_dir = os.path.abspath(working_directory)
     abs_file_path = os.path.abspath(os.path.join(working_directory, file_path))
 

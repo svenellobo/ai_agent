@@ -36,32 +36,40 @@ def main():
 
 
 def generate_content(client, messages, verbose):
+    for i in range(20):
 
-    response = client.models.generate_content(
-        model="gemini-2.0-flash-001",
-        contents=messages,
-        config=types.GenerateContentConfig(tools=[available_functions],system_instruction=system_prompt),
-    )
-    
-
-    if verbose:
-            print("Prompt tokens:", response.usage_metadata.prompt_token_count)
-            print("Response tokens:", response.usage_metadata.candidates_token_count)
-    
-    if response.function_calls:
-        for f in response.function_calls:
-            func_value = call_function(f)
-            if not func_value.parts[0].function_response.response:
-                raise Exception("Fatal exception: something went wrong")
-            elif func_value.parts[0].function_response.response and verbose:                
-                print(f"-> {func_value.parts[0].function_response.response}")
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-001",
+            contents=messages,
+            config=types.GenerateContentConfig(tools=[available_functions],system_instruction=system_prompt),
+        )
+        
+        responses_list = response.candidates
+        for r in responses_list:
+            messages.append(r.content)
 
 
+        if verbose:
+                print("Prompt tokens:", response.usage_metadata.prompt_token_count)
+                print("Response tokens:", response.usage_metadata.candidates_token_count)
+        
             
-    else:       
+        if response.function_calls:
+            for f in response.function_calls:
+                func_value = call_function(f)
+                messages.append(func_value)
+                if not func_value.parts[0].function_response.response:
+                    raise Exception("Fatal exception: something went wrong")
+                elif func_value.parts[0].function_response.response and verbose:                
+                    print(f"-> {func_value.parts[0].function_response.response}")
 
-        print("Response:")
-        print(response.text)
+        
+                
+        else:       
+
+            print("Response:")
+            print(response.text)
+            break
     
 
 if __name__ == "__main__":
